@@ -1,0 +1,21 @@
+# MATLAB/Simulink autosaves and backups
+*.asv
+*.m~
+*.autosave
+*.slx.r*
+*.mdl.r*
+
+# Simulink cache and codegen
+slprj/
+*.slxc
+codegen/
+*_grt_rtw/
+*_ert_rtw/
+
+# Compiled MEX
+*.mexa64
+*.mexw64
+*.mexmaci64
+
+# Simulation outputs (usually)
+*.mat
