@@ -20,7 +20,8 @@ P.I  = diag([P.Ix P.Iy P.Iz]);
 %   b = m*g / (4*Omega0^2)  =>  m = 4*b*Omega0^2 / g
 % With b = 1.5108e-5 and Omega0 = 76 RPS this gives ~1.40 kg, consistent
 % with the sum of the part masses in Table 4.2 (~1.31 kg + props/wiring).
-P.Omega0 = 463.1;       % [rad/s]  rotor speed at hover trim (76 RPS)
+P.Omega0 = 76 * 2 * pi;% [rad/s]  rotor speed at hover trim (76 RPS)
+P.RPS0 = 76;
 P.b      = 1.5108e-5;       % [N*s^2/rad^2 = kg*m] propeller thrust coeff.
                             %   T_i = b * Omega_i^2          (eq. 4.8/4.9)
 P.m      = 4*P.b*P.Omega0^2 / P.g;   % [kg] total mass 
@@ -78,6 +79,7 @@ P.hover.Hz       = P.Jr * (P.rotor_spin_sign * ...
                    (P.Omega0*ones(4,1)));  % [kg*m^2/s] residual rotor
                                            % momentum at hover (~0 if the
                                            % speeds are matched)
+P.hover.U = (10/7) * P.RPS0;
 
 % Control effectiveness at hover (useful for linearization):
 % dT/dOmega = 2*b*Omega0, dMx/dOmega = 2*l*b*Omega0, dMz/dOmega = 2*d*Omega0
