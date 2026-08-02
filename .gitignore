@@ -19,3 +19,4 @@ codegen/
 
 # Simulation outputs (usually)
 *.mat
+*.zip
