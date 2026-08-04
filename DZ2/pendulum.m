@@ -9,7 +9,8 @@ params.g = 9.8;
 params.l = 0.3;
 
 % Step force input
-params.U = @(t) 1*((t >= 0.2) & (t < 0.25));
+% params.U = @(t) 1*((t >= 0.2) & (t < 0.25));
+params.U = @(t) 1*(t >= 0.2);
 
 % -- SIMULATION -- 
 
