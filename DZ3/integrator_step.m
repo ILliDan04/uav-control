@@ -11,7 +11,7 @@ arguments (Input)
     x0 (13, 1) double                   % Initial state [px, py, pz, vx, vy, vz, qw, qx, qy, qz, wx, wy, wz]
     Fb (3, 1)  double                   % Forces applied to body in body frame
     Mb (3, 1)  double                   % Torque applied to body in body frame
-    h  (1, 1)  double {mustBePositive}  % Step size
+    h  (1, 1)  double {mustBeNonnegative}  % Step size
     m  (1, 1)  double {mustBePositive}  % Mass
     J  (3, 3)  double                   % Inertia matrix
 end
