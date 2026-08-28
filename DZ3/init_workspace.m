@@ -105,3 +105,6 @@ fprintf('  Motor: G(s) = %.1f/(%.1fs+1), sat 0-%d RPS\n', ...
         P.motor.K, P.motor.tau, P.motor.rps_max);
 fprintf('  Hover: Omega0 = %.1f rad/s (%.0f RPS), T = %.2f N total\n', ...
         P.Omega0, P.Omega0/(2*pi), P.hover.T_total);
+
+addpath('./helpers/');
+addpath('./sim/');
