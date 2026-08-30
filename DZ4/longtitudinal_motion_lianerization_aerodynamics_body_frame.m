@@ -13,7 +13,7 @@ syms P Q R real
 % --- States: Euler angles [rad] ------------------------------------------
 syms Phi Theta real
 
-% --- Controls: rotor angular speeds [rad/s] ------------------------------
+% --- Controls: rotor angular speeds [rps] ------------------------------
 syms w1 w2 w3 w4 real
 
 % --- Mass / geometry / environment ---------------------------------------
@@ -26,7 +26,7 @@ syms Ixx Iyy Izz Ixz real
 syms CA0 CAa2 CNa CMa CMq real  % CMq is the C_M^(omega~) damping derivative
 
 % --- Propulsion ----------------------------------------------------------
-syms CT real                    % thrust coefficient
+syms CT d_prop real                    % thrust coefficient, d_prop = diameter of prop in m
 
 % Assumptions: keep sqrt/atan from generating abs() and piecewise results
 assumeAlso(m    > 0);
@@ -55,13 +55,13 @@ Axial = (CA0 + CAa2*alpha^2) * qbar;
 Normal = (CNa*alpha)          * qbar;
 
 % --- Rotor thrust (all four rotors, axial) -------------------------------
-Thrust = CT * (w1^2 + w2^2 + w3^2 + w4^2);
+Thrust = CT * rho * d_prop ^ 4 * (w1^2 + w2^2 + w3^2 + w4^2);
 
 % --- Aerodynamic pitching moment (static + rate damping) -----------------
 M_aero = (CMa*alpha + CMq*(Lref/Vwind)*Q) * qbar * Lref;
 
 % --- Rotor differential-thrust pitching moment ---------------------------
-M_rotor = CT * b * (w3^2 + w4^2 - w1^2 - w2^2);
+M_rotor = CT * rho * d_prop ^ 4 * b * (w3^2 + w4^2 - w1^2 - w2^2);
 
 
 %% ------------------------------------------------------------------------
@@ -94,11 +94,11 @@ disp(f)
 
 % Parameter list, for later subs() of numerical values
 aoa_trim = 0.0548;
-params = [ m g rho S Lref b Ixx Iyy Izz Ixz CA0 CAa2 CNa CMa CMq CT ];
-params_values = [2.7939 9.80665 1.225 0.0122718463 0.125 0.115 0.02 0.037 0.038 0.0 0.173 -3.56 8.200933208 -1.139274432 -5 7.51E-07];
+params = [ m g rho S Lref b Ixx Iyy Izz Ixz CA0 CAa2 CNa CMa CMq CT d_prop];
+params_values = [2.7939 9.80665 1.225 0.0122718463 0.125 0.115 0.02 0.037 0.038 0.0 0.173 -3.56 8.200933208 -1.139274432 -5 0.0056 0.254];
 initial_states = [U V W P Q R Phi Theta w1 w2 w3 w4];
-initial_states_values_trim_aoa = [90*cos(aoa_trim) 0 90*sin(aoa_trim) 0 0 0 0 aoa_trim 1553 1553 2272 2272];
-initial_states_values_0_aoa = [90 0 0 0 0 0 0 0 1553 1553 2272 2272];
+initial_states_values_trim_aoa = [90*cos(aoa_trim) 0 90*sin(aoa_trim) 0 0 0 0 aoa_trim 252.3715 252.3715 369.1530 369.1530];
+initial_states_values_0_aoa = [90 0 0 0 0 0 0 0 252.3715 252.3715 369.1530 369.1530];
 
 wind_subs = subs(Vwind, initial_states, initial_states_values_trim_aoa);
 alpha_subs = subs(alpha, initial_states, initial_states_values_trim_aoa);
@@ -160,10 +160,19 @@ raw_A = jacobian(f, x);
 raw_B = jacobian(f, uctrl);
 Ax0 = subs(raw_A, initial_states, initial_states_values_trim_aoa);
 Bx0 = subs(raw_B, initial_states, initial_states_values_trim_aoa);
-A = subs(Ax0, params, params_values);
-B = subs(Bx0, params, params_values);
+Sim.A = double(subs(Ax0, params, params_values));
+Sim.B = double(subs(Bx0, params, params_values));
+
+Sim.C = eye(4);
+Sim.D = zeros(4, 4);
+
+Sim.trim_control = [252.3715 252.3715 369.1530 369.1530];
+
+Sim.initial_conditions = [90*cos(aoa_trim) 90*sin(aoa_trim) 0.0 aoa_trim];
 
 disp("A: ");
-disp(double(A));
+disp(Sim.A);
 disp("B: ");
-disp(double(B));
+disp(Sim.B);
+disp("Eig A: ");
+disp(eig(Sim.A));
