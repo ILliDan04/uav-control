@@ -82,13 +82,16 @@ Qdot = ( P*R*(Izz - Ixx) + (R^2 - P^2)*Ixz + M_aero + M_rotor ) / Iyy;
 % --- Pitch attitude ------------------------------------------------------
 Thetadot = Q*cos(Phi) - R*sin(Phi);
 
+syms aoa real
+
+Alphadot = -(Udot * W)/(U^2 + W^2) + (Wdot * U)/(U^2 + W^2);
 
 %% ------------------------------------------------------------------------
 %  5. ASSEMBLE VECTORS
 %  ------------------------------------------------------------------------
 
-f     = [ Udot ; Wdot ; Qdot ; Thetadot ];
-x     = [ U    ; W    ; Q    ; Theta    ];
+f     = [ Udot ; Wdot ; Qdot ; Thetadot; Alphadot ];
+x     = [ U    ; W    ; Q    ; Theta; aoa    ];
 uctrl = [ w1   ; w2   ; w3   ; w4       ];
 disp(f)
 
@@ -163,8 +166,8 @@ Bx0 = subs(raw_B, initial_states, initial_states_values_trim_aoa);
 Sim.A = double(subs(Ax0, params, params_values));
 Sim.B = double(subs(Bx0, params, params_values));
 
-Sim.C = eye(4);
-Sim.D = zeros(4, 4);
+Sim.C = eye(5);
+Sim.D = zeros(5, 4);
 
 Sim.trim_control = [252.3715 252.3715 369.1530 369.1530];
 
