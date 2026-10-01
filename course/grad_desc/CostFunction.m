@@ -1,28 +1,26 @@
-function cost = CostFunction(Q, R, wRT, sys_plant, sys_pid, T, h, r)
-
-    t = 0:h:T;
-    Ref = r * ones(size(t));
-
-    t = t(:);
-    Ref = Ref(:);
-
+function cost = CostFunction(Q, R, wRT, wPk, sys_plant, sys_pid, Tend, h, r, uMax)
+    t   = (0:h:Tend)';
+    Ref = r*ones(size(t));
     late = t >= 2;
 
-    T = feedback(sys_plant * sys_pid, 1);
+    Tcl = feedback(sys_plant*sys_pid, 1);
+    Gu  = feedback(sys_pid, sys_plant);        % u/r = C/(1+CP)
 
-    yOut = lsim(T, Ref, t);
-    yOut = yOut(:);
+    if any(real(pole(Tcl)) > 0)                
+        cost = 1e3; info = struct('unstable',true); return
+    end
 
-    recover_u = feedback(sys_pid, sys_plant);
+    yOut = lsim(Tcl, Ref, t);  yOut = yOut(:);
+    uIn  = lsim(Gu,  Ref, t);  uIn  = uIn(:);
 
-    uIn = lsim(recover_u, Ref, t);
-    uIn = uIn(:);
+    eN = (Ref - yOut)/r;
+    uN = uIn/uMax;
+    d  = 0.01;
 
-    e = Ref - yOut;  
+    J_error  = mean(sqrt(eN.^2 + d^2) - d);
+    J_effort = mean(uN.^2);
+    J_rise   = mean(max(0, 0.9 - yOut(late)/r).^2);
+    J_peak   = mean(max(0, abs(uN) - 0.95).^2);
 
-    J_error = trapz(t, sqrt(e.^2 + 0.01^2) - 0.01);
-    J_effort = trapz(t, uIn.^2);
-    J_rise_time = mean(max(0, 1 - yOut(late)/r).^2);
-
-    cost = Q * J_error + R * J_effort + wRT * J_rise_time;
+    cost = Q*J_error + R*J_effort + wRT*J_rise + wPk*J_peak;
 end
