@@ -38,3 +38,4 @@ dc_motor_cfg.ss.A = A;
 dc_motor_cfg.ss.B = B;
 
 dc_motor_ss = ss(A, B, [0 1], 0);
+dc_motor_ss
